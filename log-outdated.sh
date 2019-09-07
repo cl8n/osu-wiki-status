@@ -7,28 +7,31 @@ MARKER='outdated: true'
 
 for LOCALE in $LOCALES
 do
-    OUT="$1"/$LOCALE.txt
-    TEMP="$1"/.temp-$LOCALE.txt
+    WRITE=$(printf 'Locale %s\\nLast updated %s\\n' $LOCALE "$(date -R)")
+    WRITE="$WRITE"'============================================\n\n'
+    WRITE="$WRITE"'Outdated files\n--------------\n\n'
 
-    printf 'Locale %s\nLast updated %s\n' $LOCALE "$(date -R)" > "$TEMP"
-    printf '============================================\n\n' >> "$TEMP"
-    printf 'Outdated files\n--------------\n\n' >> "$TEMP"
-
-    find wiki -name $LOCALE.md -print0 | sort -z | xargs -0 grep -Fl "$MARKER" | \
-    while read -r FILE
+    find wiki -name $LOCALE.md -print0 | sort -z | xargs -0 grep -Fl "$MARKER" > .write-temp
+    while read FILE
     do
         if head "$FILE" | grep -Fq "$MARKER"
         then
             CHANGE_DATE=$(git log -1 --pretty=%cD -S"$MARKER" "$FILE")
-            printf '    %s\n    Outdated %s\n\n' "$FILE" "$CHANGE_DATE" >> "$TEMP"
+            WRITE="$WRITE"$(printf '    %-60s(outdated %s)\\n' $(dirname "$FILE" | tail -c +6) "$CHANGE_DATE")
         fi
-    done
+    done < .write-temp
 
     if test $LOCALE != 'en'
     then
-        printf 'Missing translations\n--------------------\n\n' >> "$TEMP"
-        find wiki -name en.md -execdir test ! -f $LOCALE.md ';' -printf '    %h\n' | sort >> "$TEMP"
+        WRITE="$WRITE"'\nMissing translations\n--------------------\n\n'
+
+        find wiki -name en.md -execdir test ! -f $LOCALE.md ';' -print | sort > .write-temp
+        while read FILE
+        do
+            WRITE="$WRITE"$(printf '    %-60s(%d lines)\\n' $(dirname "$FILE" | tail -c +6) $(wc -l < "$FILE"))
+        done < .write-temp
     fi
 
-    mv -f "$TEMP" "$OUT"
+    rm .write-temp
+    printf "$WRITE" > "$1"/$LOCALE.txt
 done
