@@ -14,7 +14,7 @@ do
     printf '============================================\n\n' >> "$TEMP"
     printf 'Outdated files\n--------------\n\n' >> "$TEMP"
 
-    find wiki -name $LOCALE.md -exec grep -Fl "$MARKER" '{}' + | \
+    find wiki -name $LOCALE.md -print0 | sort -z | xargs -0 grep -Fl "$MARKER" | \
     while read -r FILE
     do
         if head "$FILE" | grep -Fq "$MARKER"
@@ -27,7 +27,7 @@ do
     if test $LOCALE != 'en'
     then
         printf 'Missing translations\n--------------------\n\n' >> "$TEMP"
-        find wiki -name en.md -execdir test ! -f $LOCALE.md ';' -printf '    %h\n' >> "$TEMP"
+        find wiki -name en.md -execdir test ! -f $LOCALE.md ';' -printf '    %h\n' | sort >> "$TEMP"
     fi
 
     mv -f "$TEMP" "$OUT"
