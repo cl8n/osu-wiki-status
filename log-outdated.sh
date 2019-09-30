@@ -1,6 +1,6 @@
 #!/bin/sh
 
-git pull
+git pull -q
 
 LOCALES='be bg cs da de el en es fi fr hu id it ja ko nl no pl pt pt-br ro ru sk sv th tr vi zh zh-tw'
 MARKER='outdated: true'
