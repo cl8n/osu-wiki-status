@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>osu-wiki {{locale}} status</title>
+        <link rel="stylesheet" href="style.css">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    </head>
+    <body>
+        <div class="page-grid">
+            <div>
+                <div class="title">
+                    <img class="flag flag--left" src="https://osu.ppy.sh/images/flags/{{flag}}.png">
+                    <span>osu-wiki {{locale}} status</span>
+                    <span class="title__last-update">last updated {{lastUpdate}}</span>
+                </div>
+                <div class="section">
+                    <div class="section__title">Outdated</div>
+                    {{outdatedSection}}
+                </div>
+                <div class="section">
+                    <div class="section__title">Needs cleanup</div>
+                    {{needsCleanupSection}}
+                </div>
+                <div class="section">
+                    <div class="section__title">Missing translations</div>
+                    {{missingSection}}
+                </div>
+            </div>
+            <div>
+                {{localeMenu}}
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+const { copyFileSync, writeFileSync } = require('fs');
+const { join } = require('path');
+const buildPage = require('./build-page');
+const { availableLocales } = require('./locale');
+const OsuWiki = require('./OsuWiki');
+
+if (process.argv.length !== 4) {
+    console.error('Usage: build-status-pages <osu-wiki dir> <output dir>');
+    process.exit(1);
+}
+
+const osuWiki = new OsuWiki(process.argv[2]);
+const outputDirectory = process.argv[3];
+
+osuWiki.pull().then(() => {
+    for (const locale of availableLocales)
+        buildPage(osuWiki, locale)
+            .then((html) => writeFileSync(join(outputDirectory, `${locale}.html`), html));
+
+    copyFileSync(join(__dirname, 'templates/style.css'), join(outputDirectory, 'style.css'));
+});
