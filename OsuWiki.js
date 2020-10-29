@@ -53,6 +53,7 @@ module.exports = class {
                     needs_cleanup: false,
                     outdated: false,
                     outdated_since: null,
+                    stub: false,
                 };
 
                 const yamlMatch = content.match(/^---\n(.+?\n)---\n/s);
@@ -104,6 +105,11 @@ module.exports = class {
         return articles;
     });
 
+    getStubArticles = memoize(async () => {
+        return (await this._getArticleInfo())
+            .filter((article) => article.stub && article.locale === 'en');
+    });
+
     getTotalProblemCount = memoize(async (locale) => {
         let articles = [
             ...await this.getMissingArticlesForLocale(locale),
@@ -111,7 +117,9 @@ module.exports = class {
             ...await this.getOutdatedArticlesForLocale(locale),
         ];
 
-        if (locale !== 'en')
+        if (locale === 'en')
+            articles = [...articles, ...await this.getStubArticles()];
+        else
             articles = articles.filter((article) => /(?:contests|staff_log|tournaments)\//i.test(article.articlePath));
 
         return articles.length;

@@ -64,15 +64,20 @@ class PageBuilder {
         return this._buildArticleTable(articleRows, 'outdated-table', true);
     }
 
+    async _buildStubsSection() {
+        return this._buildArticleTable(await this.osuWiki.getStubArticles());
+    }
+
     async build() {
-        return render('page', {
+        return render(this.locale === 'en' ? 'page-en' : 'page', {
             flag: localeInfo[this.locale].flag,
             lastUpdate: new Date().toUTCString(),
             locale: this.locale.toUpperCase(),
             localeMenu: await this._buildLocaleMenu(),
-            missingSection: await this._buildMissingSection(),
+            missingSection: this.locale === 'en' ? undefined : await this._buildMissingSection(),
             needsCleanupSection: await this._buildNeedsCleanupSection(),
             outdatedSection: await this._buildOutdatedSection(),
+            stubsSection: this.locale === 'en' ? await this._buildStubsSection() : undefined,
         }, true);
     }
 }
