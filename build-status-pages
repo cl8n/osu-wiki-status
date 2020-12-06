@@ -5,6 +5,7 @@ const { join } = require('path');
 const buildPage = require('./build-page');
 const { availableLocales } = require('./locale');
 const OsuWiki = require('./OsuWiki');
+const printDiff = require('./print-diff');
 
 if (process.argv.length !== 4) {
     console.error('Usage: build-status-pages <osu-wiki dir> <output dir>');
@@ -14,10 +15,25 @@ if (process.argv.length !== 4) {
 const osuWiki = new OsuWiki(process.argv[2]);
 const outputDirectory = process.argv[3];
 
-osuWiki.pull().then(() => {
-    for (const locale of availableLocales)
-        buildPage(osuWiki, locale)
-            .then((html) => writeFileSync(join(outputDirectory, `${locale}.html`), html));
+(async () => {
+    await osuWiki.pull();
+
+    for (const locale of availableLocales) {
+        const pageHtml = await buildPage(osuWiki, locale);
+        const outdatedArticles = await osuWiki.getOutdatedArticlesForLocale(locale);
+
+        writeFileSync(join(outputDirectory, `${locale}.html`), pageHtml);
+
+        for (const article of outdatedArticles) {
+            const diff = await osuWiki.enDiffForArticle(article);
+            const filename = `diff-${locale}-${article.articlePath.replace(/[\/'"]+/g, '-')}.html`;
+
+            if (diff == null)
+                continue;
+
+            printDiff(diff, join(outputDirectory, filename));
+        }
+    }
 
     copyFileSync(join(__dirname, 'templates/style.css'), join(outputDirectory, 'style.css'));
-});
+})();
