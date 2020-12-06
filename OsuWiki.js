@@ -71,6 +71,8 @@ module.exports = class {
 
         return await this._git([
             'diff',
+            '--minimal',
+            '--no-color',
             `${article.outdated_since}^...master`,
             '--',
             `wiki/${article.articlePath}/en.md`,
