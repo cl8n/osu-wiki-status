@@ -36,7 +36,6 @@ class HtmlTemplate {
             ? minify(html, {
                 collapseBooleanAttributes: true,
                 collapseInlineTagWhitespace: true,
-                collapseWhitespace: true,
                 removeComments: true,
             })
             : templateMarker + html;
