@@ -65,6 +65,18 @@ module.exports = class {
         );
     });
 
+    async enDiffForArticle(article) {
+        if (article.locale === 'en' || article.outdated_since == null)
+            return;
+
+        return await this._git([
+            'diff',
+            `${article.outdated_since}^...master`,
+            '--',
+            `wiki/${article.articlePath}/en.md`,
+        ]);
+    }
+
     getMissingArticlesForLocale = memoize(async (locale) => {
         if (locale === 'en')
             return [];
