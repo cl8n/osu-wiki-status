@@ -94,7 +94,8 @@ module.exports = class {
             }, { enArticles: [], translatedArticlePaths: [] });
 
         return enArticles.filter((enArticle) =>
-            !translatedArticlePaths.includes(enArticle.articlePath)
+            !translatedArticlePaths.includes(enArticle.articlePath) &&
+            !/(?:^|\/)(?:contests|staff_log|tournaments)\//i.test(enArticle.articlePath)
         );
     });
 
@@ -133,8 +134,6 @@ module.exports = class {
 
         if (locale === 'en')
             articles = [...articles, ...await this.getStubArticles()];
-        else
-            articles = articles.filter((article) => /(?:contests|staff_log|tournaments)\//i.test(article.articlePath));
 
         return articles.length;
     });
