@@ -14,6 +14,10 @@
                     <span class="title__last-update">last updated {{lastUpdate}}</span>
                 </div>
                 <div class="section">
+                    <div class="section__title">Missing articles (up-to-date in English)</div>
+                    {{missingSection}}
+                </div>
+                <div class="section">
                     <div class="section__title">Outdated</div>
                     {{outdatedSection}}
                 </div>
@@ -22,8 +26,12 @@
                     {{needsCleanupSection}}
                 </div>
                 <div class="section">
-                    <div class="section__title">Missing translations</div>
-                    {{missingSection}}
+                    <div class="section__title">Missing stubs</div>
+                    {{missingStubsSection}}
+                </div>
+                <div class="section">
+                    <div class="section__title">Missing articles (outdated in English)</div>
+                    {{missingOutdatedSection}}
                 </div>
             </div>
             <div>

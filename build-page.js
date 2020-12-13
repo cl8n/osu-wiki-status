@@ -35,7 +35,15 @@ class PageBuilder {
     );
 
     async _buildMissingSection() {
-        return this._buildArticleTable(await this.osuWiki.getMissingArticlesForLocale(this.locale));
+        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => !article.stub && !article.outdated));
+    }
+
+    async _buildMissingOutdatedSection() {
+        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => article.outdated));
+    }
+
+    async _buildMissingStubsSection() {
+        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => article.stub && !article.outdated));
     }
 
     async _buildNeedsCleanupSection() {
@@ -67,7 +75,9 @@ class PageBuilder {
             lastUpdate: new Date().toUTCString(),
             locale: this.locale.toUpperCase(),
             localeMenu: await this._buildLocaleMenu(),
+            missingOutdatedSection: this.locale === 'en' ? undefined : await this._buildMissingOutdatedSection(),
             missingSection: this.locale === 'en' ? undefined : await this._buildMissingSection(),
+            missingStubsSection: this.locale === 'en' ? undefined : await this._buildMissingStubsSection(),
             needsCleanupSection: await this._buildNeedsCleanupSection(),
             outdatedSection: await this._buildOutdatedSection(),
             stubsSection: this.locale === 'en' ? await this._buildStubsSection() : undefined,
