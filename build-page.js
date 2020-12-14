@@ -25,11 +25,16 @@ class PageBuilder {
         render('locale-menu', {
             items: (await Promise.all(
                 availableLocales
-                    .map(async (locale) => render('locale-menu-item', {
-                        locale,
-                        ...localeInfo[locale],
-                        problemCount: await this.osuWiki.getTotalProblemCount(locale),
-                    }))
+                    .map(async (locale) => {
+                        const problemCount = await this.osuWiki.getTotalProblemCount(locale);
+
+                        return render('locale-menu-item', {
+                            color: this._problemCountColor(problemCount),
+                            locale,
+                            ...localeInfo[locale],
+                            problemCount,
+                        });
+                    })
             )).join(''),
         })
     );
@@ -67,6 +72,23 @@ class PageBuilder {
 
     async _buildStubsSection() {
         return this._buildArticleTable(await this.osuWiki.getStubArticles());
+    }
+
+    _problemCountColor(count) {
+        // Red at 400, yellow at 200, green at 0
+
+        const max = 400;
+        const rangeSize = 250;
+
+        const red = Math.max(0, Math.min(1, count / rangeSize));
+        const green = 1 - Math.max(0, Math.min(1, (count - max + rangeSize) / rangeSize));
+
+        return (
+            '#' +
+            Math.round(red * 255).toString(16).padStart(2, '0') +
+            Math.round(green * 255).toString(16).padStart(2, '0') +
+            '00'
+        );
     }
 
     async build() {
