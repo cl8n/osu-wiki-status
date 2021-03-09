@@ -4,16 +4,10 @@ const { safeLoad: loadYaml } = require('js-yaml');
 const { join } = require('path');
 const memoize = require('./memoize');
 
-// TODO: worst performing algorithms ever cuz lazy
-module.exports = class {
-    constructor(osuWikiDirectory) {
-        this.topDirectory = osuWikiDirectory;
-        this.wikiDirectory = join(osuWikiDirectory, 'wiki');
-    }
-
-    _git(args) {
-        return new Promise((resolve, reject) => {
-            execFile('git', args, { cwd: this.topDirectory }, (error, stdout, stderr) => {
+function execGitRetry(cwd, args, retryWait) {
+    return new Promise((resolve, reject) => {
+        try {
+            const gitProcess = execFile('git', args, { cwd }, (error, stdout, stderr) => {
                 if (error)
                     return reject(error);
 
@@ -22,7 +16,31 @@ module.exports = class {
 
                 resolve(stdout);
             });
-        });
+
+            gitProcess.on('error', reject);
+        } catch (error) {
+            // ENOMEM gets thrown here... for some reason
+            if (error.code !== 'ENOMEM')
+                return reject(error);
+
+            setTimeout(() => {
+                execGitRetry(cwd, args, retryWait)
+                    .then((value) => resolve(value))
+                    .catch((reason) => reject(reason));
+            }, retryWait);
+        }
+    });
+}
+
+// TODO: worst performing algorithms ever cuz lazy
+module.exports = class {
+    constructor(osuWikiDirectory) {
+        this.topDirectory = osuWikiDirectory;
+        this.wikiDirectory = join(osuWikiDirectory, 'wiki');
+    }
+
+    _git(args) {
+        return execGitRetry(this.topDirectory, args, 5000);
     }
 
     _getArticleInfo = memoize(async () => {

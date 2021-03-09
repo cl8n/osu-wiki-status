@@ -21,23 +21,24 @@ class PageBuilder {
         });
     }
 
-    _buildLocaleMenu = memoize(async () =>
-        render('locale-menu', {
-            items: (await Promise.all(
-                availableLocales
-                    .map(async (locale) => {
-                        const problemCount = await this.osuWiki.getTotalProblemCount(locale);
+    _buildLocaleMenu = memoize(async () => {
+        const items = [];
 
-                        return render('locale-menu-item', {
-                            color: this._problemCountColor(problemCount),
-                            locale,
-                            ...localeInfo[locale],
-                            problemCount,
-                        });
-                    })
-            )).join(''),
-        })
-    );
+        for (const locale of availableLocales) {
+            const problemCount = await this.osuWiki.getTotalProblemCount(locale);
+
+            items.push(render('locale-menu-item', {
+                color: this._problemCountColor(problemCount),
+                locale,
+                ...localeInfo[locale],
+                problemCount,
+            }));
+        }
+
+        return render('locale-menu', {
+            items: items.join(''),
+        });
+    });
 
     async _buildMissingSection() {
         return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => !article.stub && !article.outdated));
