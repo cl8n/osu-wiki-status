@@ -122,6 +122,11 @@ module.exports = class {
             .filter((article) => article.needs_cleanup && article.locale === locale);
     });
 
+    getNoNativeReviewArticlesForLocale = memoize(async (locale) => {
+        return (await this._getArticleInfo())
+            .filter((article) => article.no_native_review && article.locale === locale);
+    });
+
     getOutdatedArticlesForLocale = memoize(async (locale) => {
         const articles = (await this._getArticleInfo())
             .filter((article) => article.outdated && article.locale === locale);
@@ -147,6 +152,7 @@ module.exports = class {
         let articles = [
             ...await this.getMissingArticlesForLocale(locale),
             ...await this.getNeedsCleanupArticlesForLocale(locale),
+            ...await this.getNoNativeReviewArticlesForLocale(locale),
             ...await this.getOutdatedArticlesForLocale(locale),
         ];
 

@@ -56,6 +56,10 @@ class PageBuilder {
         return this._buildArticleTable(await this.osuWiki.getNeedsCleanupArticlesForLocale(this.locale));
     }
 
+    async _buildNoNativeReviewSection() {
+        return this._buildArticleTable(await this.osuWiki.getNoNativeReviewArticlesForLocale(this.locale));
+    }
+
     async _buildOutdatedSection() {
         const articleRows =
             (await this.osuWiki.getOutdatedArticlesForLocale(this.locale))
@@ -102,6 +106,7 @@ class PageBuilder {
             missingSection: this.locale === 'en' ? undefined : await this._buildMissingSection(),
             missingStubsSection: this.locale === 'en' ? undefined : await this._buildMissingStubsSection(),
             needsCleanupSection: await this._buildNeedsCleanupSection(),
+            noNativeReviewSection: this.locale === 'en' ? undefined : await this._buildNoNativeReviewSection(),
             outdatedSection: await this._buildOutdatedSection(),
             stubsSection: this.locale === 'en' ? await this._buildStubsSection() : undefined,
         }, true);
