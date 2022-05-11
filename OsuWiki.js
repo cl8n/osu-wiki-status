@@ -113,7 +113,11 @@ module.exports = class {
 
         return enArticles.filter((enArticle) =>
             !translatedArticlePaths.includes(enArticle.articlePath) &&
-            !/(?:^|\/)(?:contests|staff_log|tournaments)\//i.test(enArticle.articlePath)
+            !/(?:^|\/)staff_log(?:$|\/)/i.test(enArticle.articlePath) &&
+            !/(?:^|\/)contests\//i.test(enArticle.articlePath) &&
+            (!/(?:^|\/)tournaments\//i.test(enArticle.articlePath) ||
+                /(?:^|\/)tournaments\/(?:countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
+            )
         );
     });
 
