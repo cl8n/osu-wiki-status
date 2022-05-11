@@ -1,6 +1,6 @@
 const { execFile } = require('child_process');
 const { readdir, readFile, stat } = require('fs').promises;
-const { safeLoad: loadYaml } = require('js-yaml');
+const { load: loadYaml } = require('js-yaml');
 const { join } = require('path');
 const memoize = require('./memoize');
 
