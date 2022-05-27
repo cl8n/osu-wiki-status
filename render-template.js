@@ -24,7 +24,7 @@ class HtmlTemplate {
             /{{(.+?)}}/g,
             (_, key) => {
                 let data = this.data[key];
-                if (data === undefined || data === null)
+                if (!data)
                     return '';
 
                 data = data.toString();

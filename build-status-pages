@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { copyFileSync, writeFileSync } = require('fs');
+const { copyFile, writeFile } = require('fs').promises;
 const { join } = require('path');
 const buildPage = require('./build-page');
 const { availableLocales } = require('./locale');
@@ -19,21 +19,24 @@ const outputDirectory = process.argv[3];
     await osuWiki.pull();
 
     for (const locale of availableLocales) {
-        const pageHtml = await buildPage(osuWiki, locale);
-        const outdatedArticles = await osuWiki.getOutdatedArticlesForLocale(locale);
+        await writeFile(
+            join(outputDirectory, `${locale}.html`),
+            await buildPage(osuWiki, locale),
+        );
 
-        writeFileSync(join(outputDirectory, `${locale}.html`), pageHtml);
+        const outdatedArticles = await osuWiki.getOutdatedArticlesForLocale(locale);
 
         for (const article of outdatedArticles) {
             const diff = await osuWiki.enDiffForArticle(article);
             const filename = `diff-${locale}-${article.articlePath.replace(/[\/'"]+/g, '-')}.html`;
 
-            if (diff == null)
-                continue;
-
-            printDiff(diff, join(outputDirectory, filename));
+            if (diff != null)
+                printDiff(diff, join(outputDirectory, filename));
         }
     }
 
-    copyFileSync(join(__dirname, 'templates/style.css'), join(outputDirectory, 'style.css'));
+    await copyFile(
+        join(__dirname, 'templates/style.css'),
+        join(outputDirectory, 'style.css'),
+    );
 })();
