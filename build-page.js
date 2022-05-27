@@ -4,11 +4,15 @@ const render = require('./render-template');
 
 class PageBuilder {
     constructor(osuWiki, locale) {
-        this.locale = locale;
-        this.osuWiki = osuWiki;
+        this.#locale = locale;
+        this.#osuWiki = osuWiki;
     }
 
-    _buildArticleTable(articles, tableTemplate = 'article-table', rowsBuilt = false) {
+    get #translation() {
+        return this.#locale !== 'en';
+    }
+
+    #buildArticleTable(articles, tableTemplate = 'article-table', rowsBuilt = false) {
         if (articles.length === 0)
             return render('empty-section');
 
@@ -21,14 +25,14 @@ class PageBuilder {
         });
     }
 
-    _buildLocaleMenu = memoize(async () => {
+    #buildLocaleMenu = memoize(async () => {
         const items = [];
 
         for (const locale of availableLocales) {
-            const problemCount = await this.osuWiki.getTotalProblemCount(locale);
+            const problemCount = await this.#osuWiki.getTotalProblemCount(locale);
 
             items.push(render('locale-menu-item', {
-                color: this._problemCountColor(problemCount),
+                color: this.#problemCountColor(problemCount),
                 locale,
                 ...localeInfo[locale],
                 problemCount,
@@ -40,46 +44,7 @@ class PageBuilder {
         });
     });
 
-    async _buildMissingSection() {
-        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => !article.stub && !article.outdated));
-    }
-
-    async _buildMissingOutdatedSection() {
-        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => article.outdated));
-    }
-
-    async _buildMissingStubsSection() {
-        return this._buildArticleTable((await this.osuWiki.getMissingArticlesForLocale(this.locale)).filter((article) => article.stub && !article.outdated));
-    }
-
-    async _buildNeedsCleanupSection() {
-        return this._buildArticleTable(await this.osuWiki.getNeedsCleanupArticlesForLocale(this.locale));
-    }
-
-    async _buildNoNativeReviewSection() {
-        return this._buildArticleTable(await this.osuWiki.getNoNativeReviewArticlesForLocale(this.locale));
-    }
-
-    async _buildOutdatedSection() {
-        const articleRows =
-            (await this.osuWiki.getOutdatedArticlesForLocale(this.locale))
-                .map((article) => {
-                    if (article.outdated_since == null)
-                        return render('outdated-row-no-diff', article);
-
-                    article.diffLink = `diff-${article.locale}-${article.articlePath.replace(/[\/'"]+/g, '-')}`;
-
-                    return render('outdated-row', article);
-                });
-
-        return this._buildArticleTable(articleRows, 'outdated-table', true);
-    }
-
-    async _buildStubsSection() {
-        return this._buildArticleTable(await this.osuWiki.getStubArticles());
-    }
-
-    _problemCountColor(count) {
+    #problemCountColor(count) {
         // Red at 400, yellow at 200, green at 0
 
         const max = 400;
@@ -96,19 +61,113 @@ class PageBuilder {
         );
     }
 
+    //#region Section builders
+    async #buildEnOutdatedMissingSection() {
+        return this.#translation && this.#buildArticleTable(
+            (await this.#osuWiki.getMissingArticlesForLocale(this.#locale))
+                .filter((article) => article.outdated && !article.stub),
+        );
+    }
+
+    async #buildEnOutdatedMissingStubsSection() {
+        return this.#translation && this.#buildArticleTable(
+            (await this.#osuWiki.getMissingArticlesForLocale(this.#locale))
+                .filter((article) => article.outdated && article.stub),
+        );
+    }
+
+    async #buildEnOutdatedOutdatedSection() {
+        if (!this.#translation) {
+            return null;
+        }
+
+        const articles =
+            (await this.#osuWiki.getOutdatedTranslationArticlesForLocale(this.#locale))
+                .filter((article) => article.outdated);
+
+        return this.#buildArticleTable(
+            articles.map((article) => {
+                if (article.outdated_since == null) {
+                    return render('outdated-row-no-diff', article);
+                }
+
+                article.diffLink = this.#osuWiki.enDiffLinkForArticle(article);
+                return render('outdated-row', article);
+            }),
+            'outdated-table',
+            true,
+        );
+    }
+
+    async #buildMissingSection() {
+        return this.#translation && this.#buildArticleTable(
+            (await this.#osuWiki.getMissingArticlesForLocale(this.#locale))
+                .filter((article) => !article.outdated && !article.stub),
+        );
+    }
+
+    async #buildMissingStubsSection() {
+        return this.#translation && this.#buildArticleTable(
+            (await this.#osuWiki.getMissingArticlesForLocale(this.#locale))
+                .filter((article) => !article.outdated && article.stub),
+        );
+    }
+
+    async #buildNeedsCleanupSection() {
+        return this.#buildArticleTable(
+            await this.#osuWiki.getNeedsCleanupArticlesForLocale(this.#locale),
+        );
+    }
+
+    async #buildNoNativeReviewSection() {
+        return this.#translation && this.#buildArticleTable(
+            await this.#osuWiki.getNoNativeReviewArticlesForLocale(this.#locale),
+        );
+    }
+
+    async #buildOutdatedSection() {
+        const articles = this.#translation
+            ? (await this.#osuWiki.getOutdatedTranslationArticlesForLocale(this.#locale))
+                .filter((article) => !article.outdated)
+            : await this.#osuWiki.getOutdatedArticlesForEn();
+
+        return this.#buildArticleTable(
+            articles.map((article) => {
+                if (article.outdated_since == null) {
+                    return render('outdated-row-no-diff', article);
+                }
+
+                article.diffLink = this.#osuWiki.enDiffLinkForArticle(article);
+                return render('outdated-row', article);
+            }),
+            'outdated-table',
+            true,
+        );
+    }
+
+    async #buildStubsSection() {
+        return !this.#translation && this.#buildArticleTable(
+            await this.#osuWiki.getStubArticlesForEn(),
+        );
+    }
+    //#endregion
+
     async build() {
-        return render(this.locale === 'en' ? 'page-en' : 'page', {
-            flag: localeInfo[this.locale].flag,
+        return render(this.#translation ? 'page' : 'page-en', {
+            flag: localeInfo[this.#locale].flag,
             lastUpdate: new Date().toUTCString(),
-            locale: this.locale.toUpperCase(),
-            localeMenu: await this._buildLocaleMenu(),
-            missingOutdatedSection: this.locale === 'en' ? undefined : await this._buildMissingOutdatedSection(),
-            missingSection: this.locale === 'en' ? undefined : await this._buildMissingSection(),
-            missingStubsSection: this.locale === 'en' ? undefined : await this._buildMissingStubsSection(),
-            needsCleanupSection: await this._buildNeedsCleanupSection(),
-            noNativeReviewSection: this.locale === 'en' ? undefined : await this._buildNoNativeReviewSection(),
-            outdatedSection: await this._buildOutdatedSection(),
-            stubsSection: this.locale === 'en' ? await this._buildStubsSection() : undefined,
+            locale: this.#locale.toUpperCase(),
+            localeMenu: await this.#buildLocaleMenu(),
+
+            enOutdatedMissingSection: await this.#buildEnOutdatedMissingSection(),
+            enOutdatedMissingStubsSection: await this.#buildEnOutdatedMissingStubsSection(),
+            enOutdatedOutdatedSection: await this.#buildEnOutdatedOutdatedSection(),
+            missingSection: await this.#buildMissingSection(),
+            missingStubsSection: await this.#buildMissingStubsSection(),
+            needsCleanupSection: await this.#buildNeedsCleanupSection(),
+            noNativeReviewSection: await this.#buildNoNativeReviewSection(),
+            outdatedSection: await this.#buildOutdatedSection(),
+            stubsSection: await this.#buildStubsSection(),
         }, true);
     }
 }

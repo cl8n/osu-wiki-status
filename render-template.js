@@ -4,12 +4,12 @@ const { join } = require('path');
 
 class HtmlTemplate {
     constructor(templateName, data, topLevel = false) {
-        this.data = data;
-        this.template = readFileSync(join(__dirname, `templates/${templateName}.html`), 'utf8');
-        this.topLevel = topLevel;
+        this.#data = data;
+        this.#template = readFileSync(join(__dirname, `templates/${templateName}.html`), 'utf8');
+        this.#topLevel = topLevel;
     }
 
-    _sanitize(text) {
+    #sanitize(text) {
         return text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -20,19 +20,19 @@ class HtmlTemplate {
 
     render() {
         const templateMarker = '<!-- template -->';
-        const html = this.template.replace(
+        const html = this.#template.replace(
             /{{(.+?)}}/g,
             (_, key) => {
-                let data = this.data[key];
+                let data = this.#data[key];
                 if (!data)
                     return '';
 
                 data = data.toString();
-                return data.startsWith(templateMarker) ? data : this._sanitize(data);
+                return data.startsWith(templateMarker) ? data : this.#sanitize(data);
             },
         );
 
-        return this.topLevel
+        return this.#topLevel
             ? minify(html, {
                 collapseBooleanAttributes: true,
                 collapseInlineTagWhitespace: true,

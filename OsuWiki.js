@@ -35,15 +35,15 @@ function execGitRetry(cwd, args, retryWait) {
 // TODO: worst performing algorithms ever cuz lazy
 module.exports = class {
     constructor(osuWikiDirectory) {
-        this.topDirectory = osuWikiDirectory;
-        this.wikiDirectory = join(osuWikiDirectory, 'wiki');
+        this.#topDirectory = osuWikiDirectory;
+        this.#wikiDirectory = join(osuWikiDirectory, 'wiki');
     }
 
-    _git(args) {
-        return execGitRetry(this.topDirectory, args, 5000);
+    #git(args) {
+        return execGitRetry(this.#topDirectory, args, 5000);
     }
 
-    _getArticleInfo = memoize(async () => {
+    #getArticleInfo = memoize(async () => {
         const getFilenames = async (path) => {
             let files = [];
             const stats = await stat(path);
@@ -60,7 +60,7 @@ module.exports = class {
         }
 
         return await Promise.all(
-            (await getFilenames(this.wikiDirectory)).map(async (filename) => {
+            (await getFilenames(this.#wikiDirectory)).map(async (filename) => {
                 const content = await readFile(filename, 'utf8');
                 const filenameMatch = filename.match(/\/wiki\/(.+?)\/([a-z]{2}(?:-[a-z]{2})?)\.md$/);
                 const info = {
@@ -71,6 +71,7 @@ module.exports = class {
                     needs_cleanup: false,
                     outdated: false,
                     outdated_since: null,
+                    outdated_translation: false,
                     stub: false,
                 };
 
@@ -87,7 +88,7 @@ module.exports = class {
         if (article.locale === 'en' || article.outdated_since == null)
             return;
 
-        return await this._git([
+        return await this.#git([
             'diff',
             '--minimal',
             '--no-color',
@@ -97,12 +98,17 @@ module.exports = class {
         ]);
     }
 
+    enDiffLinkForArticle(article) {
+        return `diff-${article.locale}-`
+            + article.articlePath.replace(/[\/'"]+/g, '-');
+    }
+
     getMissingArticlesForLocale = memoize(async (locale) => {
         if (locale === 'en')
             return [];
 
         const { enArticles, translatedArticlePaths } =
-            (await this._getArticleInfo()).reduce((grouped, article) => {
+            (await this.#getArticleInfo()).reduce((grouped, article) => {
                 if (article.locale === 'en')
                     grouped.enArticles.push(article);
                 else if (article.locale === locale)
@@ -122,33 +128,55 @@ module.exports = class {
     });
 
     getNeedsCleanupArticlesForLocale = memoize(async (locale) => {
-        return (await this._getArticleInfo())
+        return (await this.#getArticleInfo())
             .filter((article) => article.needs_cleanup && article.locale === locale);
     });
 
     getNoNativeReviewArticlesForLocale = memoize(async (locale) => {
-        return (await this._getArticleInfo())
+        if (locale === 'en')
+            return [];
+
+        return (await this.#getArticleInfo())
             .filter((article) => article.no_native_review && article.locale === locale);
     });
 
-    getOutdatedArticlesForLocale = memoize(async (locale) => {
-        const articles = (await this._getArticleInfo())
-            .filter((article) => article.outdated && article.locale === locale);
+    getOutdatedArticlesForEn = memoize(async () => {
+        const articles = (await this.#getArticleInfo())
+            .filter((article) => article.outdated && article.locale === 'en');
 
         for (const article of articles)
-            article.outdatedSinceDate = await this._git([
+            article.outdatedSinceDate = await this.#git([
                 'log',
                 '-1',
                 '--pretty=%cs',
                 '-Soutdated: true',
+                `wiki/${article.articlePath}/en.md`,
+            ]);
+
+        return articles;
+    });
+
+    getOutdatedTranslationArticlesForLocale = memoize(async (locale) => {
+        if (locale === 'en')
+            return [];
+
+        const articles = (await this.#getArticleInfo())
+            .filter((article) => article.outdated_translation && article.locale === locale);
+
+        for (const article of articles)
+            article.outdatedSinceDate = await this.#git([
+                'log',
+                '-1',
+                '--pretty=%cs',
+                '-Soutdated_translation: true',
                 `wiki/${article.articlePath}/${article.locale}.md`,
             ]);
 
         return articles;
     });
 
-    getStubArticles = memoize(async () => {
-        return (await this._getArticleInfo())
+    getStubArticlesForEn = memoize(async () => {
+        return (await this.#getArticleInfo())
             .filter((article) => article.stub && article.locale === 'en');
     });
 
@@ -157,16 +185,20 @@ module.exports = class {
             ...await this.getMissingArticlesForLocale(locale),
             ...await this.getNeedsCleanupArticlesForLocale(locale),
             ...await this.getNoNativeReviewArticlesForLocale(locale),
-            ...await this.getOutdatedArticlesForLocale(locale),
+            ...await this.getOutdatedTranslationArticlesForLocale(locale),
         ];
 
         if (locale === 'en')
-            articles = [...articles, ...await this.getStubArticles()];
+            articles = [
+                ...articles,
+                ...await this.getOutdatedArticlesForEn(),
+                ...await this.getStubArticlesForEn(),
+            ];
 
         return articles.length;
     });
 
     pull() {
-        return this._git(['pull', '-q']);
+        return this.#git(['pull', '-q']);
     }
 }

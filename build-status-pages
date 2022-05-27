@@ -24,11 +24,11 @@ const outputDirectory = process.argv[3];
             await buildPage(osuWiki, locale),
         );
 
-        const outdatedArticles = await osuWiki.getOutdatedArticlesForLocale(locale);
+        const outdatedArticles = await osuWiki.getOutdatedTranslationArticlesForLocale(locale);
 
         for (const article of outdatedArticles) {
             const diff = await osuWiki.enDiffForArticle(article);
-            const filename = `diff-${locale}-${article.articlePath.replace(/[\/'"]+/g, '-')}.html`;
+            const filename = this.#osuWiki.enDiffLinkForArticle(article) + '.html';
 
             if (diff != null)
                 printDiff(diff, join(outputDirectory, filename));
