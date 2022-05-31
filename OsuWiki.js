@@ -34,6 +34,9 @@ function execGitRetry(cwd, args, retryWait) {
 
 // TODO: worst performing algorithms ever cuz lazy
 module.exports = class {
+    #topDirectory;
+    #wikiDirectory;
+
     constructor(osuWikiDirectory) {
         this.#topDirectory = osuWikiDirectory;
         this.#wikiDirectory = join(osuWikiDirectory, 'wiki');

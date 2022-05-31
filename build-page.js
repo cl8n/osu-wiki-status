@@ -3,6 +3,9 @@ const memoize = require('./memoize');
 const render = require('./render-template');
 
 class PageBuilder {
+    #locale;
+    #osuWiki;
+
     constructor(osuWiki, locale) {
         this.#locale = locale;
         this.#osuWiki = osuWiki;

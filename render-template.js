@@ -3,6 +3,10 @@ const { readFileSync } = require('fs');
 const { join } = require('path');
 
 class HtmlTemplate {
+    #data;
+    #template;
+    #topLevel;
+
     constructor(templateName, data, topLevel = false) {
         this.#data = data;
         this.#template = readFileSync(join(__dirname, `templates/${templateName}.html`), 'utf8');
