@@ -9,10 +9,19 @@ a {
     text-decoration: none;
 }
 
+table {
+    border-spacing: 1em 2px;
+}
+
 th {
     text-align: inherit;
     font-weight: inherit;
     text-decoration: underline;
+    white-space: nowrap;
+}
+
+td:not(.normal-wrap) {
+    white-space: nowrap;
 }
 
 .page-grid {
@@ -40,6 +49,10 @@ th {
 
 .section {
     margin-top: 1.5em;
+}
+
+.section__empty-message {
+    margin-left: 1em;
 }
 
 .section__title {
