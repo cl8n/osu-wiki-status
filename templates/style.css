@@ -27,8 +27,9 @@ td:not(.normal-wrap) {
 .page-grid {
     display: grid;
     grid-template-columns: 780px 220px;
+    gap: 1em;
     margin: 0 auto;
-    width: 1000px;
+    width: calc(1000px + 1em);
 }
 
 .title {
