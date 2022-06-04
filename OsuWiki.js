@@ -147,15 +147,6 @@ module.exports = class {
         const articles = (await this.#getArticleInfo())
             .filter((article) => article.outdated && article.locale === 'en');
 
-        for (const article of articles)
-            article.outdatedSinceDate = await this.#git([
-                'log',
-                '-1',
-                '--pretty=%cs',
-                '-Soutdated: true',
-                `wiki/${article.articlePath}/en.md`,
-            ]);
-
         return articles;
     });
 
@@ -167,13 +158,24 @@ module.exports = class {
             .filter((article) => article.outdated_translation && article.locale === locale);
 
         for (const article of articles)
-            article.outdatedSinceDate = await this.#git([
-                'log',
-                '-1',
-                '--pretty=%cs',
-                '-Soutdated_translation: true',
-                `wiki/${article.articlePath}/${article.locale}.md`,
-            ]);
+            if (article.outdated_since != null)
+                article.outdatedSinceDate = await this.#git([
+                    'log',
+                    '-1',
+                    '--pretty=%cs',
+                    article.outdated_since,
+                ]);
+            else
+                article.outdatedSinceDate = await this.#git([
+                    'log',
+                    '-1',
+                    '--pickaxe-regex',
+                    '--pretty=%cs',
+                    '-S^outdated(_translation)?: true$',
+                    `wiki/${article.articlePath}/${article.locale}.md`,
+                ]);
+
+        articles.sort((a, b) => new Date(a.outdatedSinceDate) - new Date(b.outdatedSinceDate));
 
         return articles;
     });
