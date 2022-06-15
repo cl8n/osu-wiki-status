@@ -48,11 +48,9 @@ class PageBuilder {
     });
 
     #problemCountColor(count) {
-        // Red at 400, yellow at 200, green at 0
-
-        const max = 400;
-        const rangeSize = 250;
-
+        // Red at 550, yellow at 275, green at 0
+        const max = 550;
+        const rangeSize = 325;
         const red = Math.max(0, Math.min(1, count / rangeSize));
         const green = 1 - Math.max(0, Math.min(1, (count - max + rangeSize) / rangeSize));
 
@@ -94,7 +92,7 @@ class PageBuilder {
                     return render('outdated-row-no-diff', article);
                 }
 
-                article.diffLink = this.#osuWiki.enDiffLinkForArticle(article);
+                article.diffLink = this.#osuWiki.enDiffLink(article);
                 return render('outdated-row', article);
             }),
             'outdated-table',
@@ -106,6 +104,14 @@ class PageBuilder {
         return this.#translation && this.#buildArticleTable(
             (await this.#osuWiki.getMissingArticlesForLocale(this.#locale))
                 .filter((article) => !article.outdated && !article.stub),
+        );
+    }
+
+    async #buildMissingMetaSection() {
+        return this.#translation && this.#buildArticleTable(
+            (await this.#osuWiki.getGroupInfoForLocale(this.#locale)) == null
+                ? [await this.#osuWiki.getGroupInfoForLocale('en')]
+                : []
         );
     }
 
@@ -140,7 +146,33 @@ class PageBuilder {
                     return render('outdated-row-no-diff', article);
                 }
 
-                article.diffLink = this.#osuWiki.enDiffLinkForArticle(article);
+                article.diffLink = this.#osuWiki.enDiffLink(article);
+                return render('outdated-row', article);
+            }),
+            'outdated-table',
+            true,
+        );
+    }
+
+    async #buildOutdatedMetaSection() {
+        if (!this.#translation) {
+            return null;
+        }
+
+        const articles = [];
+        const groupInfo = await this.#osuWiki.getGroupInfoForLocale(this.#locale);
+
+        if (groupInfo?.outdated_translation) {
+            articles.push(groupInfo);
+        }
+
+        return this.#buildArticleTable(
+            articles.map((article) => {
+                if (article.outdated_since == null) {
+                    return render('outdated-row-no-diff', article);
+                }
+
+                article.diffLink = this.#osuWiki.enDiffLink(article);
                 return render('outdated-row', article);
             }),
             'outdated-table',
@@ -165,10 +197,12 @@ class PageBuilder {
             enOutdatedMissingSection: await this.#buildEnOutdatedMissingSection(),
             enOutdatedMissingStubsSection: await this.#buildEnOutdatedMissingStubsSection(),
             enOutdatedOutdatedSection: await this.#buildEnOutdatedOutdatedSection(),
+            missingMetaSection: await this.#buildMissingMetaSection(),
             missingSection: await this.#buildMissingSection(),
             missingStubsSection: await this.#buildMissingStubsSection(),
             needsCleanupSection: await this.#buildNeedsCleanupSection(),
             noNativeReviewSection: await this.#buildNoNativeReviewSection(),
+            outdatedMetaSection: await this.#buildOutdatedMetaSection(),
             outdatedSection: await this.#buildOutdatedSection(),
             stubsSection: await this.#buildStubsSection(),
         }, true);

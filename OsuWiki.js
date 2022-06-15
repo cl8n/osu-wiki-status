@@ -1,7 +1,7 @@
 const { execFile } = require('child_process');
 const { readdir, readFile, stat } = require('fs').promises;
 const { load: loadYaml } = require('js-yaml');
-const { join } = require('path');
+const { join, relative } = require('path');
 const memoize = require('./memoize');
 
 function execGitRetry(cwd, args, retryWait) {
@@ -68,7 +68,7 @@ module.exports = class {
                 const filenameMatch = filename.match(/\/wiki\/(.+?)\/([a-z]{2}(?:-[a-z]{2})?)\.md$/);
                 const info = {
                     articlePath: filenameMatch[1],
-                    filename,
+                    gitPath: relative(this.#topDirectory, filename),
                     lines: (content.match(/\n/g) || []).length,
                     locale: filenameMatch[2],
                     needs_cleanup: false,
@@ -87,7 +87,7 @@ module.exports = class {
         );
     });
 
-    async enDiffForArticle(article) {
+    async enDiff(article) {
         if (article.locale === 'en' || article.outdated_since == null)
             return;
 
@@ -97,14 +97,56 @@ module.exports = class {
             '--no-color',
             `${article.outdated_since}^...master`,
             '--',
-            `wiki/${article.articlePath}/en.md`,
+            article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'),
         ]);
     }
 
-    enDiffLinkForArticle(article) {
+    enDiffLink(article) {
         return `diff-${article.locale}-`
-            + article.articlePath.replace(/[\/'"]+/g, '-');
+            + join(article.gitPath, '..').replace(/[\/'"]+/g, '-');
     }
+
+    getGroupInfoForLocale = memoize(async (locale) => {
+        const path = join(this.#topDirectory, `meta/group-info/${locale}.yaml`);
+        const content = await readFile(path, 'utf8').catch(() => null);
+
+        if (content == null) {
+            return null;
+        }
+
+        const filenameMatch = path.match(/\/meta\/(.+?)\/([a-z]{2}(?:-[a-z]{2})?)\.yaml$/);
+        const groupInfo = {
+            articlePath: filenameMatch[1],
+            gitPath: relative(this.#topDirectory, path),
+            lines: (content.match(/\n/g) || []).length,
+            locale: filenameMatch[2],
+            needs_cleanup: false,
+            outdated_since: null,
+            outdated_translation: false,
+        };
+        Object.assign(groupInfo, loadYaml(content));
+
+        if (groupInfo.outdated_translation) {
+            if (groupInfo.outdated_since != null)
+                groupInfo.outdatedSinceDate = await this.#git([
+                    'log',
+                    '-1',
+                    '--pretty=%cs',
+                    groupInfo.outdated_since,
+                ]);
+            else
+                groupInfo.outdatedSinceDate = await this.#git([
+                    'log',
+                    '-1',
+                    '--pretty=%cs',
+                    '-Soutdated_translation: true',
+                    '--',
+                    article.gitPath,
+                ]);
+        }
+
+        return groupInfo;
+    });
 
     getMissingArticlesForLocale = memoize(async (locale) => {
         if (locale === 'en')
@@ -172,7 +214,8 @@ module.exports = class {
                     '--pickaxe-regex',
                     '--pretty=%cs',
                     '-S^outdated(_translation)?: true$',
-                    `wiki/${article.articlePath}/${article.locale}.md`,
+                    '--',
+                    article.gitPath,
                 ]);
 
         articles.sort((a, b) => new Date(a.outdatedSinceDate) - new Date(b.outdatedSinceDate));
@@ -199,6 +242,9 @@ module.exports = class {
                 ...await this.getOutdatedArticlesForEn(),
                 ...await this.getStubArticlesForEn(),
             ];
+        else if (this.getGroupInfoForLocale(locale)?.outdated_translation ?? true) {
+            articles.push(null);
+        }
 
         return articles.length;
     });
