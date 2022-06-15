@@ -142,6 +142,10 @@ class PageBuilder {
 
         return this.#buildArticleTable(
             articles.map((article) => {
+                if (!this.#translation) {
+                    return render('article-row', article);
+                }
+
                 if (article.outdated_since == null) {
                     return render('outdated-row-no-diff', article);
                 }
@@ -149,7 +153,7 @@ class PageBuilder {
                 article.diffLink = this.#osuWiki.enDiffLink(article);
                 return render('outdated-row', article);
             }),
-            'outdated-table',
+            this.#translation ? 'outdated-table' : 'article-table',
             true,
         );
     }
