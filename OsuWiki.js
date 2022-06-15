@@ -138,10 +138,11 @@ module.exports = class {
                 groupInfo.outdatedSinceDate = await this.#git([
                     'log',
                     '-1',
+                    '--pickaxe-regex',
                     '--pretty=%cs',
-                    '-Soutdated_translation: true',
+                    '-S^outdated(_translation)?: true',
                     '--',
-                    article.gitPath,
+                    groupInfo.gitPath,
                 ]);
         }
 
@@ -213,7 +214,7 @@ module.exports = class {
                     '-1',
                     '--pickaxe-regex',
                     '--pretty=%cs',
-                    '-S^outdated(_translation)?: true$',
+                    '-S^outdated(_translation)?: true',
                     '--',
                     article.gitPath,
                 ]);
