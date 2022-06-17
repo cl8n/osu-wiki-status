@@ -165,6 +165,7 @@ module.exports = class {
 
         return enArticles.filter((enArticle) =>
             !translatedArticlePaths.includes(enArticle.articlePath) &&
+            !/(?:^|\/)news_styling_criteria(?:$|\/)/i.test(enArticle.articlePath) &&
             !/(?:^|\/)staff_log(?:$|\/)/i.test(enArticle.articlePath) &&
             !/(?:^|\/)contests\//i.test(enArticle.articlePath) &&
             (!/(?:^|\/)tournaments\//i.test(enArticle.articlePath) ||
