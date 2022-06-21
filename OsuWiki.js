@@ -169,7 +169,7 @@ module.exports = class {
             !/(?:^|\/)staff_log(?:$|\/)/i.test(enArticle.articlePath) &&
             !/(?:^|\/)contests\//i.test(enArticle.articlePath) &&
             (!/(?:^|\/)tournaments\//i.test(enArticle.articlePath) ||
-                /(?:^|\/)tournaments\/(?:countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
+                /(?:^|\/)tournaments\/(?:badge-weighted_seeding|countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
             )
         );
     });
