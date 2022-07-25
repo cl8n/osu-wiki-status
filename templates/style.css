@@ -84,9 +84,6 @@ footer div {
     display: flex;
     align-items: center;
     margin-top: 4px;
-}
-
-.locale-menu a {
     text-decoration: none;
 }
 
