@@ -6,7 +6,7 @@ body {
 
 a {
     color: inherit;
-    text-decoration: none;
+    text-decoration: underline dotted;
 }
 
 table {
@@ -22,6 +22,15 @@ th {
 
 td:not(.normal-wrap) {
     white-space: nowrap;
+}
+
+footer {
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+footer div {
+    margin-top: 4px;
 }
 
 .page-grid {
@@ -77,11 +86,11 @@ td:not(.normal-wrap) {
     margin-top: 4px;
 }
 
-.flag {
-    height: 1em;
+.locale-menu a {
+    text-decoration: none;
 }
 
-.flag--left {
+.flag {
     margin-right: 0.25em;
 }
 

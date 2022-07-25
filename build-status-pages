@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const { copyFile, writeFile } = require('fs').promises;
+const { copyFile, mkdir, writeFile } = require('fs').promises;
 const { join } = require('path');
 const buildPage = require('./build-page');
-const { availableLocales } = require('./locale');
+const { availableLocales, localeInfo } = require('./locale');
 const OsuWiki = require('./OsuWiki');
 const printDiff = require('./print-diff');
 
@@ -17,11 +17,18 @@ const outputDirectory = process.argv[3];
 
 (async () => {
     await osuWiki.pull();
+    await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 
     for (const locale of availableLocales) {
+        const flag = localeInfo[locale].flag;
+
         await writeFile(
             join(outputDirectory, `${locale}.html`),
             await buildPage(osuWiki, locale),
+        );
+        await copyFile(
+            join(__dirname, `templates/flags/${flag.toLowerCase()}.png`),
+            join(outputDirectory, `flags/${flag}.png`),
         );
 
         if (locale === 'en') {
