@@ -244,7 +244,7 @@ module.exports = class {
                 ...await this.getOutdatedArticlesForEn(),
                 ...await this.getStubArticlesForEn(),
             ];
-        else if (this.getGroupInfoForLocale(locale)?.outdated_translation ?? true) {
+        else if ((await this.getGroupInfoForLocale(locale))?.outdated_translation ?? true) {
             articles.push(null);
         }
 
