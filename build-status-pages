@@ -16,7 +16,10 @@ const osuWiki = new OsuWiki(process.argv[2]);
 const outputDirectory = process.argv[3];
 
 (async () => {
-    await osuWiki.pull();
+    if (!await osuWiki.update()) {
+        return;
+    }
+
     await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 
     for (const locale of availableLocales) {

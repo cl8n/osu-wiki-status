@@ -4,34 +4,6 @@ const { load: loadYaml } = require('js-yaml');
 const { join, relative } = require('path');
 const memoize = require('./memoize');
 
-function execGitRetry(cwd, args, retryWait) {
-    return new Promise((resolve, reject) => {
-        try {
-            const gitProcess = execFile('git', args, { cwd }, (error, stdout, stderr) => {
-                if (error)
-                    return reject(error);
-
-                if (stderr.trim() !== '')
-                    return reject(stderr);
-
-                resolve(stdout);
-            });
-
-            gitProcess.on('error', reject);
-        } catch (error) {
-            // ENOMEM gets thrown here... for some reason
-            if (error.code !== 'ENOMEM')
-                return reject(error);
-
-            setTimeout(() => {
-                execGitRetry(cwd, args, retryWait)
-                    .then((value) => resolve(value))
-                    .catch((reason) => reject(reason));
-            }, retryWait);
-        }
-    });
-}
-
 // TODO: worst performing algorithms ever cuz lazy
 module.exports = class {
     #topDirectory;
@@ -43,7 +15,19 @@ module.exports = class {
     }
 
     #git(args) {
-        return execGitRetry(this.#topDirectory, args, 5000);
+        return new Promise((resolve, reject) => {
+            const gitProcess = execFile('git', args, { cwd: this.#topDirectory }, (error, stdout, stderr) => {
+                if (error)
+                    return reject(error);
+
+                if (stderr.trim() !== '')
+                    return reject(stderr);
+
+                resolve(stdout);
+            });
+
+            gitProcess.on('error', reject);
+        });
     }
 
     #getArticleInfo = memoize(async () => {
@@ -251,7 +235,14 @@ module.exports = class {
         return articles.length;
     });
 
-    pull() {
-        return this.#git(['pull', '-q']);
+    async update() {
+        await this.#git(['fetch', '--quiet']);
+        try {
+            await this.#git(['diff', '--quiet', '..FETCH_HEAD']);
+            return false;
+        } catch {
+            await this.#git(['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
+            return true;
+        }
     }
 }
