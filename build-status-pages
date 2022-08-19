@@ -17,7 +17,7 @@ const outputDirectory = process.argv[3];
 
 (async () => {
     if (!await osuWiki.update()) {
-        return;
+        process.exit(1);
     }
 
     await mkdir(join(outputDirectory, 'flags'), { recursive: true });
