@@ -1,6 +1,6 @@
-const { availableLocales, localeInfo } = require('./locale');
-const memoize = require('./memoize');
-const render = require('./render-template');
+import { availableLocales, localeInfo } from './locale.js';
+import memoize from './memoize.js';
+import render from './render-template.js';
 
 class PageBuilder {
     #locale;
@@ -213,4 +213,6 @@ class PageBuilder {
     }
 }
 
-module.exports = (osuWiki, locale) => new PageBuilder(osuWiki, locale).build();
+export default function buildPage(osuWiki, locale) {
+    return new PageBuilder(osuWiki, locale).build();
+}

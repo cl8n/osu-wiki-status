@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "dependencies": {
     "diff2html": "^3.4.17",
     "html-minifier": "^4.0.0",

@@ -1,4 +1,4 @@
-module.exports.availableLocales = [
+export const availableLocales = [
     'en',
     'ar',
     'be',
@@ -32,7 +32,7 @@ module.exports.availableLocales = [
     'zh-tw',
 ];
 
-module.exports.localeInfo = {
+export const localeInfo = {
     ar: { name: 'اَلْعَرَبِيَّةُ‎', flag: 'SA' },
     be: { name: 'Беларуская мова', flag: 'BY' },
     bg: { name: 'Български', flag: 'BG' },

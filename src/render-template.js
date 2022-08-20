@@ -1,6 +1,7 @@
-const { minify } = require('html-minifier');
-const { readFileSync } = require('fs');
-const { join } = require('path');
+import { minify } from 'html-minifier';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 class HtmlTemplate {
     #data;
@@ -9,7 +10,7 @@ class HtmlTemplate {
 
     constructor(templateName, data, topLevel = false) {
         this.#data = data;
-        this.#template = readFileSync(join(__dirname, `templates/${templateName}.html`), 'utf8');
+        this.#template = readFileSync(join(fileURLToPath(import.meta.url), `../../templates/${templateName}.html`), 'utf8');
         this.#topLevel = topLevel;
     }
 
@@ -46,4 +47,6 @@ class HtmlTemplate {
     }
 }
 
-module.exports = (templateName, data, topLevel = false) => new HtmlTemplate(templateName, data, topLevel).render();
+export default function render(templateName, data, topLevel = false) {
+    return new HtmlTemplate(templateName, data, topLevel).render();
+}

@@ -1,4 +1,4 @@
-module.exports = (func) => {
+export default function memoize(func) {
     const cache = new Map();
 
     return function () {
@@ -13,4 +13,4 @@ module.exports = (func) => {
 
         return result;
     };
-};
+}

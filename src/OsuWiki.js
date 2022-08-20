@@ -1,11 +1,11 @@
-const { execFile } = require('child_process');
-const { readdir, readFile, stat } = require('fs').promises;
-const { load: loadYaml } = require('js-yaml');
-const { join, relative } = require('path');
-const memoize = require('./memoize');
+import { load as loadYaml } from 'js-yaml';
+import { execFile } from 'node:child_process';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { join, relative } from 'node:path';
+import memoize from './memoize.js';
 
 // TODO: worst performing algorithms ever cuz lazy
-module.exports = class {
+export default class OsuWiki {
     #topDirectory;
     #wikiDirectory;
 
