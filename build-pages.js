@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const { copyFile, mkdir, writeFile } = require('fs').promises;
 const { join } = require('path');
 const buildPage = require('./build-page');
@@ -8,18 +6,13 @@ const OsuWiki = require('./OsuWiki');
 const printDiff = require('./print-diff');
 
 if (process.argv.length !== 4) {
-    console.error('Usage: build-status-pages <osu-wiki dir> <output dir>');
-    process.exit(1);
+    throw 'Invalid arguments';
 }
 
 const osuWiki = new OsuWiki(process.argv[2]);
 const outputDirectory = process.argv[3];
 
 (async () => {
-    if (!await osuWiki.update()) {
-        process.exit(1);
-    }
-
     await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 
     for (const locale of availableLocales) {

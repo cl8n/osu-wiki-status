@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -eu
+
+update_only=
+
+if test "${1:-}" = --update-only; then
+	update_only=1
+	shift
+fi
+
+if test $# -ne 2; then
+	printf 'Usage: \033[4m%s\033[m [--update-only] <osu-wiki directory> <output directory>\n' "$(basename "$0")" >&2
+	exit 1
+fi
+
+if test "$update_only"; then
+	git -C "$1" fetch --quiet
+	git -C "$1" diff --quiet ..FETCH_HEAD && exit 1
+	git -C "$1" merge --ff-only --quiet FETCH_HEAD
+fi
+
+node -- "$(dirname "$0")/build-pages.js" "$1" "$2"

@@ -234,15 +234,4 @@ module.exports = class {
 
         return articles.length;
     });
-
-    async update() {
-        await this.#git(['fetch', '--quiet']);
-        try {
-            await this.#git(['diff', '--quiet', '..FETCH_HEAD']);
-            return false;
-        } catch {
-            await this.#git(['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
-            return true;
-        }
-    }
 }
