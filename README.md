@@ -4,7 +4,7 @@ Outputs web pages detailing articles in osu-wiki that need improvement. This is 
 
 ## Usage
 
-```sh
+```
 ./build-pages [--update-only] <osu-wiki directory> <output directory>
 ```
 
