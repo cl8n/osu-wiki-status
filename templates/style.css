@@ -6,7 +6,7 @@ body {
 
 a {
     color: inherit;
-    text-decoration: underline dotted;
+    text-decoration: underline dotted 1px;
 }
 
 table {
@@ -16,7 +16,7 @@ table {
 th {
     text-align: inherit;
     font-weight: inherit;
-    text-decoration: underline;
+    text-decoration: underline solid 1px;
     white-space: nowrap;
 }
 
