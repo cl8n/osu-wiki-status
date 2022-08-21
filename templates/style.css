@@ -20,6 +20,10 @@ th {
     white-space: nowrap;
 }
 
+td.normal-wrap {
+    word-break: break-all;
+}
+
 td:not(.normal-wrap) {
     white-space: nowrap;
 }
@@ -35,10 +39,10 @@ footer div {
 
 .page-grid {
     display: grid;
-    grid-template-columns: 780px 220px;
+    grid-template-columns: 1fr max-content;
     gap: 1em;
     margin: 0 auto;
-    width: calc(1000px + 1em);
+    max-width: 1000px;
 }
 
 .title {
@@ -94,4 +98,6 @@ footer div {
 .problem-count {
     font-weight: bold;
     margin-left: auto;
+    width: 4em;
+    text-align: right;
 }
