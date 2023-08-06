@@ -10,7 +10,15 @@ a {
 }
 
 table {
-    border-spacing: 1em 2px;
+    border-collapse: collapse;
+}
+
+tr:nth-child(2n) {
+    background-color: #00000008;
+}
+
+td, th {
+    padding: 2px 1em;
 }
 
 th {
