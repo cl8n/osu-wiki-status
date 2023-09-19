@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "diff2html": "^3.4.17",
+    "diff2html": "^3.4.45",
     "html-minifier": "^4.0.0",
     "js-yaml": "^4.1.0"
   }
