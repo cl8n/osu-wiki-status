@@ -104,6 +104,7 @@ footer div {
 }
 
 .problem-count {
+    color: hsl(calc(var(--count) / 560 * -120deg + 120deg), 70%, 50%);
     font-weight: bold;
     margin-left: auto;
     width: 4em;

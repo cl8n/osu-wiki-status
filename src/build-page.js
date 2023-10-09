@@ -32,35 +32,15 @@ class PageBuilder {
         const items = [];
 
         for (const locale of availableLocales) {
-            const problemCount = await this.#osuWiki.getTotalProblemCount(locale);
-
             items.push(render('locale-menu-item', {
-                color: this.#problemCountColor(problemCount),
                 locale,
                 ...localeInfo[locale],
-                problemCount,
+                problemCount: await this.#osuWiki.getTotalProblemCount(locale),
             }));
         }
 
-        return render('locale-menu', {
-            items: items.join(''),
-        });
+        return render('locale-menu', { items: items.join('') });
     });
-
-    #problemCountColor(count) {
-        // Red at 550, yellow at 275, green at 0
-        const max = 550;
-        const rangeSize = 325;
-        const red = Math.max(0, Math.min(1, count / rangeSize));
-        const green = 1 - Math.max(0, Math.min(1, (count - max + rangeSize) / rangeSize));
-
-        return (
-            '#' +
-            Math.round(red * 255).toString(16).padStart(2, '0') +
-            Math.round(green * 255).toString(16).padStart(2, '0') +
-            '00'
-        );
-    }
 
     //#region Section builders
     async #buildEnOutdatedMissingSection() {
