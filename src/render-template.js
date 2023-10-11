@@ -39,7 +39,9 @@ export default function render(templateName, data, topLevel = false) {
 	return topLevel
 		? minify(html, {
 			collapseBooleanAttributes: true,
-			collapseInlineTagWhitespace: true,
+			collapseWhitespace: true,
+			minifyCSS: true,
+			minifyJS: true,
 			removeComments: true,
 		})
 		: templateMarker + html;
