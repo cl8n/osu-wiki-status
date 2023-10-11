@@ -3,50 +3,44 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-class HtmlTemplate {
-    #data;
-    #template;
-    #topLevel;
+const templateCache = {};
+const templateMarker = '<!-- template -->';
 
-    constructor(templateName, data, topLevel = false) {
-        this.#data = data;
-        this.#template = readFileSync(join(fileURLToPath(import.meta.url), `../../templates/${templateName}.html`), 'utf8');
-        this.#topLevel = topLevel;
-    }
+function getTemplate(templateName) {
+	templateCache[templateName] ??= readFileSync(join(
+		fileURLToPath(import.meta.url),
+		`../../templates/${templateName}.html`,
+	), 'utf8');
 
-    #sanitize(text) {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    render() {
-        const templateMarker = '<!-- template -->';
-        const html = this.#template.replace(
-            /{{(.+?)}}/g,
-            (_, key) => {
-                let data = this.#data[key];
-                if (!data && data !== 0)
-                    return '';
-
-                data = data.toString();
-                return data.startsWith(templateMarker) ? data : this.#sanitize(data);
-            },
-        );
-
-        return this.#topLevel
-            ? minify(html, {
-                collapseBooleanAttributes: true,
-                collapseInlineTagWhitespace: true,
-                removeComments: true,
-            })
-            : templateMarker + html;
-    }
+	return templateCache[templateName];
 }
 
 export default function render(templateName, data, topLevel = false) {
-    return new HtmlTemplate(templateName, data, topLevel).render();
+	const html = getTemplate(templateName).replaceAll(
+		/{{([a-z]+)}}/gi,
+		(_, key) => {
+			let value = data[key]?.toString();
+
+			if (!value) {
+				return '';
+			}
+
+			return value.startsWith(templateMarker)
+				? value
+				: value
+					.replaceAll('&', '&amp;')
+					.replaceAll('<', '&lt;')
+					.replaceAll('>', '&gt;')
+					.replaceAll('"', '&quot;')
+					.replaceAll("'", '&#039;');
+		},
+	);
+
+	return topLevel
+		? minify(html, {
+			collapseBooleanAttributes: true,
+			collapseInlineTagWhitespace: true,
+			removeComments: true,
+		})
+		: templateMarker + html;
 }
