@@ -152,6 +152,7 @@ export default class OsuWiki {
             !/(?:^|\/)news_styling_criteria(?:$|\/)/i.test(enArticle.articlePath) &&
             !/(?:^|\/)staff_log(?:$|\/)/i.test(enArticle.articlePath) &&
             !/(?:^|\/)contests\//i.test(enArticle.articlePath) &&
+            !/(?:^|\/)legal\/sctl\//i.test(enArticle.articlePath) &&
             (!/(?:^|\/)tournaments\//i.test(enArticle.articlePath) ||
                 /(?:^|\/)tournaments\/(?:badge-weighted_seeding|countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
             )
