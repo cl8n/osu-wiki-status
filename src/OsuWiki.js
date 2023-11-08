@@ -85,9 +85,8 @@ export default class OsuWiki {
         ]);
     }
 
-    enDiffLink(article) {
-        return `diff-${article.locale}-`
-            + join(article.gitPath, '..').replace(/[\/'"]+/g, '-');
+    diffLink(commitSha, path) {
+        return `diff/${commitSha}/${path}`;
     }
 
     getGroupInfoForLocale = memoize(async (locale) => {

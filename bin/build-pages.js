@@ -40,10 +40,18 @@ for (const locale of availableLocales) {
 
     for (const article of outdatedArticles) {
         const diff = await osuWiki.enDiff(article);
-        const filename = osuWiki.enDiffLink(article) + '.html';
 
-        if (diff != null)
-            printDiff(diff, join(outputDirectory, filename));
+        if (diff == null) {
+            continue;
+        }
+
+        const outputPath = join(
+            outputDirectory,
+            osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1')) + '.html',
+        );
+
+        await mkdir(join(outputPath, '..'), { recursive: true });
+        printDiff(diff, outputPath);
     }
 }
 

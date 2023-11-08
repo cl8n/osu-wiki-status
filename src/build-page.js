@@ -72,7 +72,7 @@ class PageBuilder {
                     return render('outdated-row-no-diff', article);
                 }
 
-                article.diffLink = this.#osuWiki.enDiffLink(article);
+                article.diffLink = this.#osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'));
                 return render('outdated-row', article);
             }),
             'outdated-table',
@@ -130,7 +130,7 @@ class PageBuilder {
                     return render('outdated-row-no-diff', article);
                 }
 
-                article.diffLink = this.#osuWiki.enDiffLink(article);
+                article.diffLink = this.#osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'));
                 return render('outdated-row', article);
             }),
             this.#translation ? 'outdated-table' : 'article-table',
@@ -156,7 +156,7 @@ class PageBuilder {
                     return render('outdated-row-no-diff', article);
                 }
 
-                article.diffLink = this.#osuWiki.enDiffLink(article);
+                article.diffLink = this.#osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'));
                 return render('outdated-row', article);
             }),
             'outdated-table',
