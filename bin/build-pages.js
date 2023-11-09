@@ -39,7 +39,7 @@ for (const locale of availableLocales) {
     }
 
     for (const article of outdatedArticles) {
-        const diff = await osuWiki.enDiff(article);
+        const { diff, diffHasRenames } = await osuWiki.enDiff(article);
 
         if (diff == null) {
             continue;
@@ -61,6 +61,7 @@ for (const locale of availableLocales) {
                     commitId: article.outdated_since.slice(0, 7),
                     commitDate: article.outdatedSinceDate,
                     diff,
+                    diffClass: diffHasRenames ? '' : 'hide-diff-headers',
                     locale: 'EN',
                     toOutputDirectory: relative(join(outputPath, '..'), outputDirectory),
                 },

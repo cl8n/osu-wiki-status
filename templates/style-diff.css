@@ -34,3 +34,7 @@ footer div {
 	border: 1px solid #aaa;
 	border-radius: 100px;
 }
+
+.hide-diff-headers .d2h-file-header {
+	display: none !important;
+}

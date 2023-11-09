@@ -72,8 +72,9 @@ export default class OsuWiki {
     });
 
     async enDiff(article) {
-        if (article.locale === 'en' || article.outdated_since == null)
-            return;
+        if (article.locale === 'en' || article.outdated_since == null) {
+            return {};
+        }
 
         const pathsString = await this.#git([
             'log',
@@ -84,15 +85,19 @@ export default class OsuWiki {
             '--',
             article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'),
         ]);
+        const paths = new Set(pathsString.split(/\r\n|\r|\n/));
 
-        return await this.#git([
-            'diff',
-            '--minimal',
-            '--no-color',
-            `${article.outdated_since}^...master`,
-            '--',
-            ...new Set(pathsString.split(/\r\n|\r|\n/)),
-        ]);
+        return {
+            diff: await this.#git([
+                'diff',
+                '--minimal',
+                '--no-color',
+                `${article.outdated_since}^...master`,
+                '--',
+                ...paths,
+            ]),
+            diffHasRenames: paths.size > 1,
+        };
     }
 
     diffLink(commitSha, path) {
