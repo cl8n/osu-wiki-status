@@ -70,6 +70,10 @@ for (const locale of availableLocales) {
     }
 }
 
+await writeFile(
+    join(outputDirectory, 'diff-not-found.html'),
+    render('diff-not-found', null, true),
+);
 await copyFile(
     join(fileURLToPath(import.meta.url), '../../templates/style.css'),
     join(outputDirectory, 'style.css'),
