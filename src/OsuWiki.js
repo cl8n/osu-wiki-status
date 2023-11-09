@@ -90,6 +90,7 @@ export default class OsuWiki {
         return {
             diff: await this.#git([
                 'diff',
+                '--find-renames=1%',
                 '--minimal',
                 '--no-color',
                 `${article.outdated_since}^...master`,
