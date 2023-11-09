@@ -21,9 +21,9 @@ export default class OsuWiki {
                     return reject(error);
 
                 if (stderr.trim() !== '')
-                    return reject(stderr);
+                    return reject(stderr.trim());
 
-                resolve(stdout);
+                resolve(stdout.trim());
             });
 
             gitProcess.on('error', reject);
@@ -75,13 +75,23 @@ export default class OsuWiki {
         if (article.locale === 'en' || article.outdated_since == null)
             return;
 
+        const pathsString = await this.#git([
+            'log',
+            '--follow',
+            '--name-only',
+            '--pretty=',
+            `${article.outdated_since}^..master`,
+            '--',
+            article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'),
+        ]);
+
         return await this.#git([
             'diff',
             '--minimal',
             '--no-color',
             `${article.outdated_since}^...master`,
             '--',
-            article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1'),
+            ...new Set(pathsString.split(/\r\n|\r|\n/)),
         ]);
     }
 
