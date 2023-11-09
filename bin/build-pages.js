@@ -1,10 +1,10 @@
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import buildPage from '../src/build-page.js';
 import { availableLocales, localeInfo } from '../src/locale.js';
 import OsuWiki from '../src/OsuWiki.js';
-import printDiff from '../src/print-diff.js';
+import render from '../src/render-template.js';
 
 if (process.argv.length !== 4) {
     throw 'Invalid arguments';
@@ -51,7 +51,22 @@ for (const locale of availableLocales) {
         );
 
         await mkdir(join(outputPath, '..'), { recursive: true });
-        printDiff(diff, outputPath);
+        await writeFile(
+            outputPath,
+            render(
+                'diff',
+                {
+                    articleBasename: basename(article.articlePath),
+                    articlePath: article.articlePath,
+                    commitId: article.outdated_since.slice(0, 7),
+                    commitDate: article.outdatedSinceDate,
+                    diff,
+                    locale: 'EN',
+                    toOutputDirectory: relative(join(outputPath, '..'), outputDirectory),
+                },
+                true,
+            ),
+        );
     }
 }
 
