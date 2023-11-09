@@ -74,3 +74,7 @@ await copyFile(
     join(fileURLToPath(import.meta.url), '../../templates/style.css'),
     join(outputDirectory, 'style.css'),
 );
+await copyFile(
+    join(fileURLToPath(import.meta.url), '../../templates/style-diff.css'),
+    join(outputDirectory, 'style-diff.css'),
+);
