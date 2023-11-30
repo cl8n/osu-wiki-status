@@ -187,7 +187,7 @@ export default class OsuWiki {
             return [];
 
         return (await this.#getArticleInfo())
-            .filter((article) => article.no_native_review && article.locale === locale);
+            .filter((article) => (article.no_native_review || article.no_native_review_since) && article.locale === locale);
     });
 
     getOutdatedArticlesForEn = memoize(async () => {
