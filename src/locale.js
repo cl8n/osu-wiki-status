@@ -1,38 +1,5 @@
-export const availableLocales = [
-    'en',
-    'ar',
-    'be',
-    'bg',
-    'cs',
-    'da',
-    'de',
-    'el',
-    'es',
-    'fi',
-    'fr',
-    'hu',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'nl',
-    'no',
-    'pl',
-    'pt',
-    'pt-br',
-    'ro',
-    'ru',
-    'sk',
-    'sv',
-    'th',
-    'tr',
-    'uk',
-    'vi',
-    'zh',
-    'zh-tw',
-];
-
 export const localeInfo = {
+    en: { name: 'English', flag: 'GB' },
     ar: { name: 'اَلْعَرَبِيَّةُ‎', flag: 'SA' },
     be: { name: 'беларуская мова', flag: 'BY' },
     bg: { name: 'български', flag: 'BG' },
@@ -41,7 +8,6 @@ export const localeInfo = {
     da: { name: 'dansk', flag: 'DK' },
     de: { name: 'Deutsch', flag: 'DE' },
     el: { name: 'ελληνικά', flag: 'GR' },
-    en: { name: 'English', flag: 'GB' },
     es: { name: 'español', flag: 'ES' },
     fi: { name: 'suomi', flag: 'FI' },
     fil: { name: 'wikang Filipino', flag: 'PH' },
@@ -73,3 +39,5 @@ export const localeInfo = {
     'zh-hk': { name: '繁體中文（香港）', flag: 'HK' },
     'zh-tw': { name: '繁體中文（台灣）', flag: 'TW' },
 };
+
+export const availableLocales = Object.keys(localeInfo);
