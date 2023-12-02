@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';

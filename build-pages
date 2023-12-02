@@ -20,4 +20,4 @@ if test "$update_only"; then
 	git -C "$1" merge --ff-only --quiet FETCH_HEAD
 fi
 
-node -- "$(dirname "$0")/bin/build-pages.js" "$1" "$2"
+"$(dirname "$0")/bin/build-pages.js" "$1" "$2"
