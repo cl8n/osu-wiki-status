@@ -35,7 +35,7 @@ export default class OsuWiki {
             let files = [];
             const stats = await stat(path);
 
-            if (stats.isFile() && /\/[a-z]{2}(?:-[a-z]{2})?\.md$/.test(path))
+            if (stats.isFile() && /\/[a-z-]{2,5}\.md$/.test(path))
                 files.push(path);
             else if (stats.isDirectory()) {
                 const dirents = await readdir(path, { withFileTypes: true });
@@ -49,7 +49,7 @@ export default class OsuWiki {
         return await Promise.all(
             (await getFilenames(this.#wikiDirectory)).map(async (filename) => {
                 const content = await readFile(filename, 'utf8');
-                const filenameMatch = filename.match(/\/wiki\/(.+?)\/([a-z]{2}(?:-[a-z]{2})?)\.md$/);
+                const filenameMatch = filename.match(/\/wiki\/(.+?)\/([a-z-]{2,5})\.md$/);
                 const info = {
                     articlePath: filenameMatch[1],
                     gitPath: relative(this.#topDirectory, filename),
@@ -113,7 +113,7 @@ export default class OsuWiki {
             return null;
         }
 
-        const filenameMatch = path.match(/\/meta\/(.+?)\/([a-z]{2}(?:-[a-z]{2})?)\.yaml$/);
+        const filenameMatch = path.match(/\/meta\/(.+?)\/([a-z-]{2,5})\.yaml$/);
         const groupInfo = {
             articlePath: filenameMatch[1],
             gitPath: relative(this.#topDirectory, path),
