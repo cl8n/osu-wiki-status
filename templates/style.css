@@ -21,6 +21,10 @@ td, th {
     padding: 2px 1em;
 }
 
+td.align-right, th.align-right {
+    text-align: right;
+}
+
 th {
     text-align: inherit;
     font-weight: inherit;
