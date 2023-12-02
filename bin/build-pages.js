@@ -9,7 +9,8 @@ import OsuWiki from '../src/OsuWiki.js';
 import render from '../src/render-template.js';
 
 if (process.argv.length !== 4) {
-    throw 'Invalid arguments';
+	console.error('Invalid arguments (run from ../build-pages instead)');
+	process.exit(1);
 }
 
 const osuWiki = new OsuWiki(process.argv[2]);
