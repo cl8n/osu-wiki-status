@@ -1,8 +1,24 @@
 <div class="locale-menu">
     <div class="locale-menu__title">Languages</div>
     {{items}}
+    <button class="locale-menu__button" data-hidden="1">Show more languages</button>
     <footer>
         <div>Flag icons by <a href="http://famfamfam.com">Mark James</a></div>
         <div><a href="https://github.com/cl8n/osu-wiki-status">Source code and issue tracker</a></div>
     </footer>
 </div>
+
+<script>
+	var button = document.querySelector('.locale-menu__button');
+
+	button.addEventListener('click', function () {
+		button.dataset.hidden = button.dataset.hidden ? '' : '1';
+		button.textContent = 'Show ' + (button.dataset.hidden ? 'more' : 'less') + ' languages';
+
+		document
+			.querySelectorAll('.js-locale-hidden')
+			.forEach(function (localeMenuItem) {
+				localeMenuItem.classList.toggle('locale-menu__item--hidden');
+			});
+	});
+</script>

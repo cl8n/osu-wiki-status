@@ -4,7 +4,7 @@ import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import buildPage from '../src/build-page.js';
-import { availableLocales, localeInfo } from '../src/locale.js';
+import locales from '../src/locales.js';
 import OsuWiki from '../src/OsuWiki.js';
 import render from '../src/render-template.js';
 
@@ -18,9 +18,7 @@ const outputDirectory = process.argv[3];
 
 await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 
-for (const locale of availableLocales) {
-    const flag = localeInfo[locale].flag;
-
+for (const [locale, { flag }] of Object.entries(locales)) {
     await writeFile(
         join(outputDirectory, `${locale}.html`),
         await buildPage(osuWiki, locale),

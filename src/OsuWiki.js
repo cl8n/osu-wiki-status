@@ -105,6 +105,10 @@ export default class OsuWiki {
         return `diff/${commitSha}/${path}`;
     }
 
+	getArticleCount = memoize((locale) => this.#getArticleInfo().then(
+		(articles) => articles.filter((article) => article.locale === locale).length,
+	));
+
     getGroupInfoForLocale = memoize(async (locale) => {
         const path = join(this.#topDirectory, `meta/group-info/${locale}.yaml`);
         const content = await readFile(path, 'utf8').catch(() => null);

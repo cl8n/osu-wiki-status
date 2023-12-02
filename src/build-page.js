@@ -1,4 +1,4 @@
-import { availableLocales, localeInfo } from './locale.js';
+import locales from './locales.js';
 import memoize from './memoize.js';
 import render from './render-template.js';
 
@@ -28,19 +28,28 @@ class PageBuilder {
         });
     }
 
-    #buildLocaleMenu = memoize(async () => {
-        const items = [];
+	#buildLocaleMenu = memoize(async () => {
+		const itemProperties = [];
 
-        for (const locale of availableLocales) {
-            items.push(render('locale-menu-item', {
-                locale,
-                ...localeInfo[locale],
-                problemCount: await this.#osuWiki.getTotalProblemCount(locale),
-            }));
-        }
+		for (const [locale, properties] of Object.entries(locales)) {
+			itemProperties.push({
+				...properties,
+				class: await this.#osuWiki.getArticleCount(locale) < 10
+					? 'locale-menu__item--hidden js-locale-hidden'
+					: '',
+				locale,
+				problemCount: await this.#osuWiki.getTotalProblemCount(locale),
+			});
+		}
 
-        return render('locale-menu', { items: items.join('') });
-    });
+		return render('locale-menu', {
+			items: itemProperties
+				.sort((a, b) => a.class.length - b.class.length) // Sort hidden last
+				.sort((a, b) => +(b.locale === 'en') - +(a.locale === 'en')) // Sort EN first
+				.map((properties) => render('locale-menu-item', properties))
+				.join(''),
+		});
+	});
 
     //#region Section builders
     async #buildEnOutdatedMissingSection() {
@@ -173,7 +182,7 @@ class PageBuilder {
 
     async build() {
         return render(this.#translation ? 'page' : 'page-en', {
-            flag: localeInfo[this.#locale].flag,
+            flag: locales[this.#locale].flag,
             lastUpdate: new Date().toUTCString(),
             locale: this.#locale.toUpperCase(),
             localeMenu: await this.#buildLocaleMenu(),

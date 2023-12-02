@@ -92,6 +92,14 @@ footer div {
     padding-left: 1em;
 }
 
+.locale-menu__button {
+	all: unset;
+	cursor: pointer;
+	font-size: 14px;
+	margin-top: 16px;
+	text-decoration: underline dotted 1px;
+}
+
 .locale-menu__title {
     font-weight: bold;
     margin-bottom: 1em;
@@ -104,6 +112,10 @@ footer div {
     justify-content: space-between;
     margin-top: 4px;
     text-decoration: none;
+}
+
+.locale-menu__item--hidden {
+	display: none;
 }
 
 .locale-menu__item-name {
