@@ -223,7 +223,7 @@ export default class OsuWiki {
                     article.gitPath,
                 ]);
 
-        articles.sort((a, b) => new Date(a.outdatedSinceDate) - new Date(b.outdatedSinceDate));
+        articles.sort((a, b) => new Date(b.outdatedSinceDate) - new Date(a.outdatedSinceDate));
 
         return articles;
     });
