@@ -8,13 +8,23 @@ import locales from '../src/locales.js';
 import OsuWiki from '../src/OsuWiki.js';
 import render from '../src/render-template.js';
 
+const updateOnly = process.argv[2] === '--update-only';
+
+if (updateOnly) {
+	process.argv.splice(2, 1);
+}
+
 if (process.argv.length !== 4) {
-	console.error('Invalid arguments (run from ../build-pages instead)');
+	console.error('Usage: npm run build -- [--update-only] <osu-wiki directory> <output directory>');
 	process.exit(1);
 }
 
 const osuWiki = new OsuWiki(process.argv[2]);
 const outputDirectory = process.argv[3];
+
+if (updateOnly && !await osuWiki.checkAndMergeUpdates()) {
+	process.exit(1);
+}
 
 await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 

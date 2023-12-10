@@ -71,6 +71,19 @@ export default class OsuWiki {
         );
     });
 
+	async checkAndMergeUpdates() {
+		await this.#git(['fetch', '--quiet']);
+
+		try {
+			await this.#git(['diff', '--quiet', '..FETCH_HEAD']);
+			return false;
+		} catch {}
+
+		await this.#git(['merge', '--ff-only', '--quiet', 'FETCH_HEAD']);
+
+		return true;
+	}
+
     async enDiff(article) {
         if (article.locale === 'en' || article.outdated_since == null) {
             return {};

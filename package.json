@@ -1,6 +1,9 @@
 {
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "node bin/build-pages.js"
+  },
   "dependencies": {
     "html-minifier": "^4.0.0",
     "js-yaml": "^4.1.0"
