@@ -1,6 +1,6 @@
 # osu-wiki status
 
-Outputs web pages detailing articles in osu-wiki that need improvement. This is most commonly consumed by translators to help coordinate their updating of the wiki.
+Outputs web pages detailing articles in [osu-wiki](https://github.com/ppy/osu-wiki) that need improvement. This is most commonly consumed by translators to help coordinate their updating of the wiki.
 
 ## Usage
 
