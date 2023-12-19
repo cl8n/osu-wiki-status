@@ -5,7 +5,7 @@ Outputs web pages detailing articles in [osu-wiki](https://github.com/ppy/osu-wi
 ## Usage
 
 ```
-./build-pages [--update-only] <osu-wiki directory> <output directory>
+npm run build -- [--update-only] <osu-wiki directory> <output directory>
 ```
 
 The `--update-only` option automatically merges changes from upstream osu-wiki prior to running, or skips building pages if there are no new changes. It should be run on a schedule.
