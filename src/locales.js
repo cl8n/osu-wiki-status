@@ -31,11 +31,9 @@ export default {
 	sr: { name: 'српски', flag: 'RS' },
 	sv: { name: 'svenska', flag: 'SE' },
 	th: { name: 'ไทย', flag: 'TH' },
-	tl: { name: 'Tagalog', flag: 'PH' },
 	tr: { name: 'Türkçe', flag: 'TR' },
 	uk: { name: 'українська мова', flag: 'UA' },
 	vi: { name: 'tiếng Việt', flag: 'VN' },
 	zh: { name: '简体中文', flag: 'CN' },
-	'zh-hk': { name: '繁體中文（香港）', flag: 'HK' },
 	'zh-tw': { name: '繁體中文（台灣）', flag: 'TW' },
 };
