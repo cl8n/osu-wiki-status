@@ -6,6 +6,8 @@ import memoize from './memoize.js';
 
 // TODO: worst performing algorithms ever cuz lazy
 export default class OsuWiki {
+    gitPathToPrsMap = {};
+
     #topDirectory;
     #wikiDirectory;
 
@@ -59,6 +61,7 @@ export default class OsuWiki {
                     outdated: false,
                     outdated_since: null,
                     outdated_translation: false,
+                    prs: this.gitPathToPrsMap[relative(this.#topDirectory, filename)] ?? [],
                     stub: false,
                 };
 
@@ -139,6 +142,7 @@ export default class OsuWiki {
             needs_cleanup: false,
             outdated_since: null,
             outdated_translation: false,
+            prs: this.gitPathToPrsMap[relative(this.#topDirectory, path)] ?? [],
         };
         Object.assign(groupInfo, loadYaml(content));
 
