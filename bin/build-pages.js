@@ -20,6 +20,11 @@ if (process.argv.length !== 4) {
 	process.exit(1);
 }
 
+if (!process.env.GITHUB_TOKEN) {
+    console.error('Set GITHUB_TOKEN environment variable');
+    process.exit(1);
+}
+
 const osuWiki = new OsuWiki(process.argv[2]);
 const outputDirectory = process.argv[3];
 
@@ -129,6 +134,7 @@ function github(uri) {
 
         get(`https://api.github.com${uri}`, {
             headers: {
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
                 'User-Agent': 'osu-wiki-status',
                 'X-GitHub-Api-Version': '2022-11-28',
             },
