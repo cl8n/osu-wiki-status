@@ -99,7 +99,10 @@ class PageBuilder {
     async #buildMissingMetaSection() {
         return this.#translation && this.#buildArticleTable(
             (await this.#osuWiki.getGroupInfoForLocale(this.#locale)) == null
-                ? [await this.#osuWiki.getGroupInfoForLocale('en')]
+                ? [{
+                    ...await this.#osuWiki.getGroupInfoForLocale('en'),
+                    prs: this.#osuWiki.gitPathToPrsMap[`meta/group-info/${this.#locale}.yaml`] ?? [],
+                }]
                 : []
         );
     }
