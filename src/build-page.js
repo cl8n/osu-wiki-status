@@ -23,7 +23,11 @@ class PageBuilder {
             rows: rowsBuilt
                 ? articles.join('')
                 : articles
-                    .map((article) => render('article-row', article))
+                    .map((article) => {
+                        article.prCell = article.prs.map((pr) => render('pr-cell', { pr })).join('');
+
+                        return render('article-row', article);
+                    })
                     .join(''),
         });
     }
@@ -77,6 +81,8 @@ class PageBuilder {
 
         return this.#buildArticleTable(
             articles.map((article) => {
+                article.prCell = article.prs.map((pr) => render('pr-cell', { pr })).join('');
+
                 if (article.outdated_since == null) {
                     return render('outdated-row-no-diff', article);
                 }
@@ -134,6 +140,8 @@ class PageBuilder {
 
         return this.#buildArticleTable(
             articles.map((article) => {
+                article.prCell = article.prs.map((pr) => render('pr-cell', { pr })).join('');
+
                 if (!this.#translation) {
                     return render('article-row', article);
                 }
@@ -164,6 +172,8 @@ class PageBuilder {
 
         return this.#buildArticleTable(
             articles.map((article) => {
+                article.prCell = article.prs.map((pr) => render('pr-cell', { pr })).join('');
+
                 if (article.outdated_since == null) {
                     return render('outdated-row-no-diff', article);
                 }

@@ -60,10 +60,7 @@ for (const [locale, { flag }] of Object.entries(locales)) {
         join(outputDirectory, `${locale}.html`),
         await buildPage(osuWiki, locale),
     );
-    await copyFile(
-        join(fileURLToPath(import.meta.url), `../../templates/flags/${flag.toLowerCase()}.png`),
-        join(outputDirectory, `flags/${flag}.png`),
-    );
+    await copyTemplateToOutput(`flags/${flag.toLowerCase()}.png`, `flags/${flag}.png`);
 
     if (locale === 'en') {
         continue;
@@ -113,14 +110,18 @@ await writeFile(
     join(outputDirectory, 'diff-not-found.html'),
     render('diff-not-found', null, true),
 );
-await copyFile(
-    join(fileURLToPath(import.meta.url), '../../templates/style.css'),
-    join(outputDirectory, 'style.css'),
-);
-await copyFile(
-    join(fileURLToPath(import.meta.url), '../../templates/style-diff.css'),
-    join(outputDirectory, 'style-diff.css'),
-);
+
+await copyTemplateToOutput('diff.png');
+await copyTemplateToOutput('pr.png');
+await copyTemplateToOutput('style.css');
+await copyTemplateToOutput('style-diff.css');
+
+function copyTemplateToOutput(filename, outputFilename) {
+    return copyFile(
+        join(fileURLToPath(import.meta.url), '../../templates', filename),
+        join(outputDirectory, outputFilename ?? filename),
+    );
+}
 
 function github(uri) {
     return new Promise((resolve, reject) => {
