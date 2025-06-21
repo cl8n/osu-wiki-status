@@ -6,7 +6,7 @@ import { basename, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import buildPage from '../src/build-page.js';
 import locales from '../src/locales.js';
-import OsuWiki from '../src/OsuWiki.js';
+import OsuWiki, { GitBadObjectError } from '../src/OsuWiki.js';
 import render from '../src/render-template.js';
 
 const updateOnly = process.argv[2] === '--update-only';
@@ -60,55 +60,63 @@ for (const pr of prs) {
 
 await mkdir(join(outputDirectory, 'flags'), { recursive: true });
 
-for (const [locale, { flag }] of Object.entries(locales)) {
-    await writeFile(
-        join(outputDirectory, `${locale}.html`),
-        await buildPage(osuWiki, locale),
-    );
-    await copyTemplateToOutput(`flags/${flag.toLowerCase()}.png`, `flags/${flag}.png`);
+try {
+    for (const [locale, { flag }] of Object.entries(locales)) {
+        await writeFile(
+            join(outputDirectory, `${locale}.html`),
+            await buildPage(osuWiki, locale),
+        );
+        await copyTemplateToOutput(`flags/${flag.toLowerCase()}.png`, `flags/${flag}.png`);
 
-    if (locale === 'en') {
-        continue;
-    }
-
-    const groupInfo = await osuWiki.getGroupInfoForLocale(locale);
-    const outdatedArticles = await osuWiki.getOutdatedTranslationArticlesForLocale(locale);
-
-    if (groupInfo?.outdated_translation) {
-        outdatedArticles.push(groupInfo);
-    }
-
-    for (const article of outdatedArticles) {
-        const { diff, diffHasRenames } = await osuWiki.enDiff(article);
-
-        if (diff == null) {
+        if (locale === 'en') {
             continue;
         }
 
-        const outputPath = join(
-            outputDirectory,
-            osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1')) + '.html',
-        );
+        const groupInfo = await osuWiki.getGroupInfoForLocale(locale);
+        const outdatedArticles = await osuWiki.getOutdatedTranslationArticlesForLocale(locale);
 
-        await mkdir(join(outputPath, '..'), { recursive: true });
-        await writeFile(
-            outputPath,
-            render(
-                'diff',
-                {
-                    articleBasename: basename(article.articlePath),
-                    articlePath: article.articlePath,
-                    commitId: article.outdated_since.slice(0, 7),
-                    commitDate: article.outdatedSinceDate,
-                    diff,
-                    diffClass: diffHasRenames ? '' : 'hide-diff-headers',
-                    locale: 'EN',
-                    toOutputDirectory: relative(join(outputPath, '..'), outputDirectory),
-                },
-                true,
-            ),
-        );
+        if (groupInfo?.outdated_translation) {
+            outdatedArticles.push(groupInfo);
+        }
+
+        for (const article of outdatedArticles) {
+            const { diff, diffHasRenames } = await osuWiki.enDiff(article);
+
+            if (diff == null) {
+                continue;
+            }
+
+            const outputPath = join(
+                outputDirectory,
+                osuWiki.diffLink(article.outdated_since, article.gitPath.replace(/\/[^\/]+(\.[a-z]+)$/i, '/en$1')) + '.html',
+            );
+
+            await mkdir(join(outputPath, '..'), { recursive: true });
+            await writeFile(
+                outputPath,
+                render(
+                    'diff',
+                    {
+                        articleBasename: basename(article.articlePath),
+                        articlePath: article.articlePath,
+                        commitId: article.outdated_since.slice(0, 7),
+                        commitDate: article.outdatedSinceDate,
+                        diff,
+                        diffClass: diffHasRenames ? '' : 'hide-diff-headers',
+                        locale: 'EN',
+                        toOutputDirectory: relative(join(outputPath, '..'), outputDirectory),
+                    },
+                    true,
+                ),
+            );
+        }
     }
+} catch (error) {
+    if (error instanceof GitBadObjectError) {
+        process.exit(1);
+    }
+
+    throw error;
 }
 
 await writeFile(

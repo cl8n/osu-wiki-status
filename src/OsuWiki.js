@@ -4,6 +4,18 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import memoize from './memoize.js';
 
+export class GitBadObjectError extends Error {
+    hash;
+
+    constructor(hash) {
+        super();
+
+        this.hash = hash;
+
+        Object.setPrototypeOf(this, GitBadObjectError.prototype);
+    }
+}
+
 // TODO: worst performing algorithms ever cuz lazy
 export default class OsuWiki {
     gitPathToPrsMap = {};
@@ -19,11 +31,15 @@ export default class OsuWiki {
     #git(args) {
         return new Promise((resolve, reject) => {
             const gitProcess = execFile('git', args, { cwd: this.#topDirectory }, (error, stdout, stderr) => {
-                if (error)
-                    return reject(error);
+                if (error) {
+                    const badObjectMatch = stderr.match(/fatal: bad object ([0-9a-f]{32})/);
 
-                if (stderr.trim() !== '')
-                    return reject(stderr.trim());
+                    if (badObjectMatch != null) {
+                        reject(new GitBadObjectError(badObjectMatch[1]));
+                    }
+
+                    return reject(error);
+                }
 
                 resolve(stdout.trim());
             });
