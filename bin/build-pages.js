@@ -9,14 +9,22 @@ import locales from '../src/locales.js';
 import OsuWiki, { GitBadObjectError } from '../src/OsuWiki.js';
 import render from '../src/render-template.js';
 
-const updateOnly = process.argv[2] === '--update-only';
+const updateOnlyPosition = process.argv.indexOf('--update-only', 2);
+const updateOnly = updateOnlyPosition >= 0;
 
 if (updateOnly) {
-	process.argv.splice(2, 1);
+	process.argv.splice(updateOnlyPosition, 1);
+}
+
+const verbosePosition = process.argv.indexOf('-v', 2);
+const verbose = verbosePosition >= 0;
+
+if (verbose) {
+	process.argv.splice(verbosePosition, 1);
 }
 
 if (process.argv.length !== 4) {
-	console.error('Usage: npm run build -- [--update-only] <osu-wiki directory> <output directory>');
+	console.error('Usage: npm run build -- [--update-only] [-v] <osu-wiki directory> <output directory>');
 	process.exit(1);
 }
 
@@ -113,6 +121,10 @@ try {
     }
 } catch (error) {
     if (error instanceof GitBadObjectError) {
+        if (verbose) {
+            console.error(`Bad git hash found: ${error.hash}`);
+        }
+
         process.exit(1);
     }
 
