@@ -32,6 +32,23 @@ th {
     white-space: nowrap;
 }
 
+th .sort {
+    all: unset;
+    cursor: pointer;
+}
+
+th .sort[data-direction="1"]::before {
+    content: "▲";
+}
+
+th .sort[data-direction="0"]::before {
+    content: "▬";
+}
+
+th .sort[data-direction="-1"]::before {
+    content: "▼";
+}
+
 td.normal-wrap {
     word-break: break-all;
 }

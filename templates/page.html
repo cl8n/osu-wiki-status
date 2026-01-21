@@ -4,6 +4,62 @@
         <title>osu-wiki {{locale}} status</title>
         <link rel="stylesheet" href="style.css">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+        <script>
+            /**
+             * @param {HTMLButtonElement} thisButton
+             * @param {"number" | "string"} sortType
+             */
+            function sortTable(thisButton, sortType) {
+                const headRow = thisButton.closest("tr");
+                const body = thisButton.closest("table")?.querySelector("tbody");
+
+                if (headRow == null || body == null) {
+                    return;
+                }
+
+                const asc = Number.parseInt(thisButton.dataset.direction, 10) <= 0;
+                let columnIndex;
+
+                thisButton.dataset.direction = asc ? 1 : -1;
+
+                for (let i = 0; i < headRow.cells.length; i++) {
+                    const button = headRow.cells[i].querySelector(".sort");
+
+                    if (button != null) {
+                        if (button === thisButton) {
+                            columnIndex = i;
+                        } else {
+                            button.dataset.direction = 0;
+                        }
+                    }
+                }
+
+                const rows = [...body.rows];
+                const getSortKey = sortKeyFn(columnIndex);
+
+                rows.sort((a, b) => {
+                    const aKey = getSortKey(a);
+                    const bKey = getSortKey(b);
+                    const order = sortType === "string"
+                        ? aKey.localeCompare(bKey)
+                        : Number.parseInt(aKey, 10) - Number.parseInt(bKey, 10);
+
+                    return asc ? order : -order;
+                });
+                body.replaceChildren(...rows);
+            }
+
+            /**
+             * @param {number} columnIndex
+             * @returns {(row: HTMLTableRowElement) => string}
+             */
+            function sortKeyFn(columnIndex) {
+                return function (row) {
+                    return row.cells.item(columnIndex)?.innerText ?? "";
+                };
+            }
+        </script>
     </head>
     <body>
         <div class="page-grid">
