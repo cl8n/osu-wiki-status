@@ -211,7 +211,7 @@ export default class OsuWiki {
                 /(?:^|\/)contests\/(?:contest_points|official_support)(?:$|\/)/i.test(enArticle.articlePath)
             ) &&
             (!/(?:^|\/)tournaments\//i.test(enArticle.articlePath) ||
-                /(?:^|\/)tournaments\/(?:badge-weighted_seeding|countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
+                /(?:^|\/)tournaments\/(?:badge-weighted_seeding|common_seeding_methods|countries_that_participated_in_osu!_tournaments|official_support)(?:$|\/)/i.test(enArticle.articlePath)
             )
         ).map((enArticle) => ({
             ...enArticle,
